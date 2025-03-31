@@ -5,6 +5,7 @@ TriggerMap is a minimal, web-first MVP for logging emotional triggers—your ver
 ## Table of Contents
 
 - [Overview](./OVERVIEW.md)
+- [How-To](./HOWTO.md)
 - [Features](#features)
 - [Installation](./INSTALLATION.md)
 - [Development](./DEVELOPMENT.md)
