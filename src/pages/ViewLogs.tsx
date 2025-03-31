@@ -14,7 +14,8 @@ interface TriggerFormData {
 }
 
 const ViewLogs: React.FC = () => {
-  const [logs, setLogs] = useState<TriggerFormData[]>([]);
+const [logs, setLogs] = useState<TriggerFormData[]>([]);
+const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Load logs from LocalStorage on component mount
   useEffect(() => {
@@ -23,6 +24,10 @@ const ViewLogs: React.FC = () => {
       setLogs(JSON.parse(stored));
     }
   }, []);
+
+  const filteredLogs = logs.filter(log =>
+    log.event.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   // Delete a single log by index
   const handleDelete = (indexToDelete: number) => {
@@ -68,12 +73,22 @@ const ViewLogs: React.FC = () => {
         </button>
       )}
 
+<div style={{ marginBottom: '1rem' }}>
+  <input
+    type="text"
+    placeholder="Search logs by event..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    style={{ padding: '0.5rem', width: '100%', borderRadius: '4px', border: '1px solid #ccc' }}
+  />
+</div>
 
-      {logs.length === 0 ? (
+
+      {filteredLogs.length === 0 ? (
         <p>No logs found. Log a trigger first!</p>
       ) : (
         <ul style={{ listStyle: 'none', padding: 0 }}>
-          {logs.map((log, index) => (
+          {filteredLogs.map((log, index) => (
             <li
               key={index}
               style={{
