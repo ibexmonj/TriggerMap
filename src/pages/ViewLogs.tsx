@@ -16,6 +16,7 @@ interface TriggerFormData {
 const ViewLogs: React.FC = () => {
 const [logs, setLogs] = useState<TriggerFormData[]>([]);
 const [searchQuery, setSearchQuery] = useState<string>('');
+const [analysisResults, setAnalysisResults] = useState<{ [key: number]: string }>({});
 
   // Load logs from LocalStorage on component mount
   useEffect(() => {
@@ -55,6 +56,40 @@ const [searchQuery, setSearchQuery] = useState<string>('');
     URL.revokeObjectURL(url);
   };
 
+
+  const analyzeLog = async (log: TriggerFormData): Promise<string> => {
+    const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || '/api/analyze';
+
+    const prompt = `Analyze the following emotional trigger log and provide empathetic insights and suggestions:
+    
+  Event: ${log.event}
+  Emotions: ${log.emotions}
+  Internal Narrative: ${log.narrative}
+  Violated Core Needs: ${log.coreNeeds}
+  Deeper Truth: ${log.deeperTruth}
+  Ideal Alternative: ${log.idealAlternative}
+  Action: ${log.action}`;
+  
+    const response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+    
+    const data = await response.json();
+    return data.choices[0].message.content;
+  };
+
+  const handleAnalyze = async (index: number, log: TriggerFormData) => {
+    try {
+      const analysis = await analyzeLog(log);
+      setAnalysisResults(prev => ({ ...prev, [index]: analysis }));
+    } catch (error) {
+      console.error('Error analyzing log:', error);
+      setAnalysisResults(prev => ({ ...prev, [index]: 'Analysis failed. Please try again.' }));
+    }
+  };
+  
   return (
     <div>
       <h1>View Logs</h1>
@@ -120,14 +155,28 @@ const [searchQuery, setSearchQuery] = useState<string>('');
                 <strong>Action:</strong> {log.action}
               </p>
               <p>
-                 <strong>Date:</strong> {log.date ? new Date(log.date).toLocaleString() : 'No date available'}
+                <strong>Date:</strong> {new Date(log.date).toLocaleString()}
               </p>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button onClick={() => handleDelete(index)}>Delete Log</button>
                 <Link to={`/log/edit/${index}`}>
                   <button>Edit Log</button>
                 </Link>
+                <button onClick={() => handleAnalyze(index, log)}>Analyze</button>
               </div>
+              {analysisResults[index] && (
+                <div
+                  style={{
+                    marginTop: '0.5rem',
+                    backgroundColor: '#f1f1f1',
+                    padding: '0.5rem',
+                    borderRadius: '4px',
+                  }}
+                >
+                  <strong>Analysis:</strong>
+                  <p>{analysisResults[index]}</p>
+                </div>
+              )}
             </li>
           ))}
         </ul>
