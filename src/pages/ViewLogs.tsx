@@ -58,7 +58,10 @@ const [analysisResults, setAnalysisResults] = useState<{ [key: number]: string }
 
 
   const analyzeLog = async (log: TriggerFormData): Promise<string> => {
-    const API_ENDPOINT = import.meta.env.VITE_API_ENDPOINT || '/api/analyze';
+    const API_ENDPOINT =
+      import.meta.env.MODE === 'development'
+        ? '/api/analyze'
+        : 'https://api.triggermap.app/api/analyze';
 
     const prompt = `Analyze the following emotional trigger log and provide empathetic insights and suggestions:
     
